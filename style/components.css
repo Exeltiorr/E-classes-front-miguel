@@ -1,12 +1,6 @@
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 /* Grid de cards */
@@ -24,15 +18,18 @@
   border: 1px solid var(--glass-border);
   border-radius: 20px;
   padding: 1.5rem;
-  transition: var(--transition);
+  /* MODIFICADO: adiciona a transição de cor sem matar o transform */
+  transition: var(--transition), border-color 0.4s ease, box-shadow 0.4s ease, background 0.4s ease;
   position: relative;
   overflow: hidden;
 }
 
 .card:hover {
-  border-color: var(--primary);
+  /* MODIFICADO: usa a cor dinâmica */
+  border-color: var(--dynamic-primary);
   transform: translateY(-5px);
   background: var(--surface-hover);
+  box-shadow: 0 8px 25px var(--dynamic-primary-glow);
 }
 
 .card h3 {
@@ -57,22 +54,9 @@
   gap: 1rem;
 }
 
-.team-score {
-  text-align: center;
-  flex: 1;
-}
-
-.vs {
-  font-weight: 800;
-  color: var(--text-dim);
-  font-style: italic;
-}
-
-.score {
-  font-size: 2.5rem;
-  font-weight: 800;
-  margin: 0.5rem 0;
-}
+.team-score { text-align: center; flex: 1; }
+.vs { font-weight: 800; color: var(--text-dim); font-style: italic; }
+.score { font-size: 2.5rem; font-weight: 800; margin: 0.5rem 0; }
 
 /* Modal e formulário */
 .form-container {
@@ -84,9 +68,7 @@
   width: 90%;
 }
 
-.form-group {
-  margin-bottom: 1.5rem;
-}
+.form-group { margin-bottom: 1.5rem; }
 
 label {
   display: block;
@@ -95,22 +77,23 @@ label {
   font-size: 0.9rem;
 }
 
-input,
-select {
+input, select {
   width: 100%;
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid var(--glass-border);
   border-radius: 12px;
   padding: 0.85rem 1rem;
   color: white;
-  transition: var(--transition);
+  transition: var(--transition), border-color 0.4s ease, box-shadow 0.4s ease;
 }
 
 input:focus,
 select:focus {
   outline: none;
-  border-color: var(--primary);
+  /* MODIFICADO: usa a cor dinâmica */
+  border-color: var(--dynamic-primary);
   background: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 0 0 3px var(--dynamic-primary-glow);
 }
 
 input[type="color"] {
@@ -130,11 +113,13 @@ button {
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  /* MODIFICADO: usa as cores dinâmicas */
+  background: linear-gradient(135deg, var(--dynamic-primary), var(--dynamic-secondary));
   color: white;
+  transition: background 0.4s ease, box-shadow 0.4s ease, transform 0.3s ease;
 }
 
 .btn-primary:hover {
-  box-shadow: 0 8px 25px var(--primary-glow);
+  box-shadow: 0 8px 25px var(--dynamic-primary-glow);
   transform: scale(1.02);
 }

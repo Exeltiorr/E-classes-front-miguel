@@ -6,8 +6,10 @@ let state = {
     confrontos: [],
 };
 
-// Inicialização
+// Inicialização — MODIFICADO: o efeito do mouse é iniciado ANTES do await,
+// senão ele só rodaria depois de todos os dados carregarem.
 document.addEventListener('DOMContentLoaded', async () => {
+    iniciarEfeitoCor();          // ← ADICIONADO
     await carregarDados();
     configurarNavegacao();
     renderizarTudo();
@@ -329,3 +331,120 @@ window.encerrarConfrontos = function (id) {
         renderizarTudo();
     }
 };
+
+/* ============================================
+   ADIÇÃO: Efeito de cor dinâmica com o mouse
+   ============================================ */
+function iniciarEfeitoCor() {
+    const root = document.documentElement;
+
+    const colors = {
+        red:    { h: 0,   s: 90, l: 55 },
+        yellow: { h: 48,  s: 95, l: 55 },
+        green:  { h: 145, s: 75, l: 45 },
+        blue:   { h: 220, s: 85, l: 60 },
+    };
+
+    const lerp = (a, b, t) => a + (b - a) * t;
+    const lerpHue = (a, b, t) => {
+        let diff = b - a;
+        if (diff > 180)  diff -= 360;
+        if (diff < -180) diff += 360;
+        let result = a + diff * t;
+        if (result < 0)   result += 360;
+        if (result > 360) result -= 360;
+        return result;
+    };
+
+    let current = { h: 220, s: 85, l: 60 };
+    let target  = { h: 220, s: 85, l: 60 };
+
+    function calcularCor(x, y) {
+        const pesoDireita  = Math.max(0, x);
+        const pesoEsquerda = Math.max(0, -x);
+        const pesoCima     = Math.max(0, -y);
+        const pesoBaixo    = Math.max(0, y);
+        const total = pesoDireita + pesoEsquerda + pesoCima + pesoBaixo;
+
+        if (total < 0.001) return { ...colors.blue };
+
+        let sinSum = 0, cosSum = 0;
+        const pesos = {
+            yellow: pesoDireita,
+            green:  pesoEsquerda,
+            blue:   pesoCima,
+            red:    pesoBaixo,
+        };
+
+        for (const nome in pesos) {
+            const peso = pesos[nome];
+            if (peso <= 0) continue;
+            const rad = colors[nome].h * Math.PI / 180;
+            sinSum += Math.sin(rad) * peso;
+            cosSum += Math.cos(rad) * peso;
+        }
+
+        let hue = Math.atan2(sinSum, cosSum) * 180 / Math.PI;
+        if (hue < 0) hue += 360;
+
+        const sat = (
+            colors.yellow.s * pesoDireita +
+            colors.green.s  * pesoEsquerda +
+            colors.blue.s   * pesoCima +
+            colors.red.s    * pesoBaixo
+        ) / total;
+
+        const lum = (
+            colors.yellow.l * pesoDireita +
+            colors.green.l  * pesoEsquerda +
+            colors.blue.l   * pesoCima +
+            colors.red.l    * pesoBaixo
+        ) / total;
+
+        return { h: hue, s: sat, l: lum };
+    }
+
+    function animar() {
+        const ease = 0.08;
+
+        current.h = lerpHue(current.h, target.h, ease);
+        current.s = lerp(current.s, target.s, ease);
+        current.l = lerp(current.l, target.l, ease);
+
+        const primaryH   = current.h;
+        const secondaryH = (current.h + 45) % 360;
+
+        root.style.setProperty('--dynamic-primary',
+            `hsl(${primaryH}, ${current.s}%, ${current.l}%)`);
+        root.style.setProperty('--dynamic-secondary',
+            `hsl(${secondaryH}, ${current.s}%, ${current.l}%)`);
+        root.style.setProperty('--dynamic-primary-glow',
+            `hsla(${primaryH}, ${current.s}%, ${current.l}%, 0.4)`);
+        root.style.setProperty('--dynamic-secondary-glow',
+            `hsla(${secondaryH}, ${current.s}%, ${current.l}%, 0.4)`);
+
+        // Também atualiza os glows originais (usados pelo body::before/after)
+        root.style.setProperty('--primary-glow',
+            `hsla(${primaryH}, ${current.s}%, ${current.l}%, 0.4)`);
+        root.style.setProperty('--secondary-glow',
+            `hsla(${secondaryH}, ${current.s}%, ${current.l}%, 0.4)`);
+
+        requestAnimationFrame(animar);
+    }
+
+    function onMouseMove(e) {
+        const x = (e.clientX / window.innerWidth)  * 2 - 1;
+        const y = (e.clientY / window.innerHeight) * 2 - 1;
+        target = calcularCor(x, y);
+    }
+
+    function onTouchMove(e) {
+        if (!e.touches.length) return;
+        const t = e.touches[0];
+        onMouseMove({ clientX: t.clientX, clientY: t.clientY });
+    }
+
+    window.addEventListener('mousemove', onMouseMove);
+    window.addEventListener('touchmove', onTouchMove, { passive: true });
+    animar();
+}

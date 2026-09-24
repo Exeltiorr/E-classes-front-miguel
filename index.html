@@ -21,7 +21,7 @@
                     <li data-view="jogos"><i class="fas fa-trophy"></i> Jogos</li>
                     <li data-view="times"><i class="fas fa-users"></i> Times</li>
                     <li data-view="competidores"><i class="fas fa-user-ninja"></i> Competidores</li>
-                    <li data-view="confrontos"><i class="fa-solid fa-hand-fist"></i></i> Confrontos</li>
+                    <li data-view="confrontos"><i class="fa-solid fa-hand-fist"></i> Confrontos</li>
                 </ul>
             </nav>
         </aside>
@@ -98,11 +98,13 @@
     </div>
 
     <!-- Modal -->
-    <div id="modal-container" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); backdrop-filter:blur(10px); z-index:1000; display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition: all 0.3s cubic-bezier(0.4,0,0.2,1);">
+    <div id="modal-container" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); backdrop-filter:blur(10px); z-index:1000; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition: opacity 0.3s cubic-bezier(0.4,0,0.2,1);">
         <div class="form-container" id="form-content"></div>
     </div>
 
+    <!-- Carrega o serviço PRIMEIRO (define getData, getJogos, etc.) -->
     <script src="service/api.js"></script>
+    <!-- Depois o controller (usa as funções + efeito do mouse) -->
     <script src="controller/app.js"></script>
 </body>
 </html>
